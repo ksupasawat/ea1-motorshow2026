@@ -276,7 +276,7 @@ function ss(s){
 }
 
 function nowD(){const n=new Date(),p=v=>String(v).padStart(2,'0');return `${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()}`;}
-function toISO(dd){if(!dd)return'';const[d,m,y]=dd.split('/');return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+function toISO(dd){if(!dd)return'';const dateOnly=dd.split(' ')[0];const[d,m,y]=dateOnly.split('/');return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
 
 function filterData(data,fromISO,toISO,series){
   return data.filter(b=>{
