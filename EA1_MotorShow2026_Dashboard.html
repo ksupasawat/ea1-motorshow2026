@@ -201,7 +201,7 @@
 
 <div class="tw">
   <div class="tabs">
-    <button class="tb on" onclick="sw(0)">📊 ยอดจองรายวัน</button>
+    <button class="tb on" onclick="sw(0)">📊 ยอดจองราย Series</button>
     <button class="tb" onclick="sw(1)">🏢 ราย Dealer</button>
     <button class="tb" onclick="sw(2)">👤 ราย พนักงานขาย</button>
   </div>
@@ -216,7 +216,11 @@
     <button class="btn-ref" onclick="refresh()">↻ โหลดใหม่</button>
   </div>
   <div class="cc">
-    <div class="cc-title"><span>ยอดจองรายวัน แยกตาม Series</span><span class="cc-sub" id="t0lbl"></span></div>
+    <div class="cc-title"><span>ยอดจองวันนี้ ราย Series</span><span class="cc-sub" id="t0lbl_today"></span></div>
+    <div class="cw"><canvas id="c0_today"></canvas></div>
+  </div>
+  <div class="cc">
+    <div class="cc-title"><span>ยอดจองสะสม ราย Series</span><span class="cc-sub" id="t0lbl"></span></div>
     <div class="cw"><canvas id="c0"></canvas></div>
   </div>
 </div>
@@ -314,36 +318,70 @@ function populateSeriesFilters(){
   });
 }
 
+let ch0_today=null;
+
+function makeBarChart(canvasId,labels,datasets,oldChart){
+  const ctx=document.getElementById(canvasId);
+  if(!ctx)return null;
+  if(oldChart)oldChart.destroy();
+  return new Chart(ctx,{type:'bar',data:{labels,datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:(i)=>i.dataset.label+': '+i.parsed.y+' คัน'}}
+    },
+    scales:{
+      x:{grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun',size:12}}},
+      y:{beginAtZero:true,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun',size:12},precision:0}}
+    },
+    barPercentage:0.6,
+    categoryPercentage:0.8
+  }});
+}
+
 function r0(){
   const from=document.getElementById('t0f').value,to=document.getElementById('t0t').value;
   const data=filterData(allData,from,to,'');
-  const dset=new Set();data.forEach(b=>{const d=b.date?b.date.split(' ')[0]:b.date;dset.add(d);});
-  const dates=[...dset].sort((a,b)=>toISO(a).localeCompare(toISO(b)));
-  document.getElementById('t0lbl').textContent=`รวม ${data.length} คัน`;
-  const cw=document.getElementById('c0').parentElement;
-  if(!dates.length){cw.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';return;}
-  if(!cw.querySelector('canvas')){cw.innerHTML='<canvas id="c0"></canvas>';}
-  const datasets=SERIES.map((s,i)=>{
-    const col=COLORS[i%COLORS.length];
-    const counts=dates.map(d=>data.filter(b=>{const bd=b.date?b.date.split(' ')[0]:b.date;return bd===d&&b.series===s;}).length);
-    const total=counts.reduce((a,b)=>a+b,0);
-    return {label:s+' ('+total+' คัน)',data:counts,backgroundColor:col+'dd',borderColor:col,borderWidth:2,borderRadius:4};
-  }).filter(ds=>ds.data.some(v=>v>0));
-  const ctx=document.getElementById('c0').getContext('2d');
-  if(ch0)ch0.destroy();
-  ch0=new Chart(ctx,{type:'bar',data:{labels:dates,datasets},options:{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{
-      legend:{labels:{color:'#1a2e24',font:{family:'Sarabun',size:12},padding:16}},
-      tooltip:{mode:'index',intersect:false,callbacks:{footer:(items)=>{const t=items.reduce((s,i)=>s+i.parsed.y,0);return t>0?'รวม: '+t+' คัน':'';}}}
-    },
-    scales:{
-      x:{stacked:false,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun',size:12}}},
-      y:{stacked:false,beginAtZero:true,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun',size:12},precision:0}}
-    },
-    barPercentage:0.85,
-    categoryPercentage:0.7
-  }});
+
+  // ── กราฟที่ 1: ยอดวันนี้ราย Series ──
+  const today=nowD();
+  const todayData=data.filter(b=>(b.date?b.date.split(' ')[0]:b.date)===today);
+  const todayCounts=SERIES.map(s=>todayData.filter(b=>b.series===s).length);
+  const todayTotal=todayCounts.reduce((a,b)=>a+b,0);
+  document.getElementById('t0lbl_today').textContent='วันที่ '+today+' รวม '+todayTotal+' คัน';
+  const todayDatasets=SERIES.map((s,i)=>({
+    label:s,
+    data:[todayCounts[i]],
+    backgroundColor:COLORS[i%COLORS.length]+'dd',
+    borderColor:COLORS[i%COLORS.length],
+    borderWidth:2,borderRadius:6
+  })).filter(d=>d.data[0]>0);
+  if(todayDatasets.length){
+    ch0_today=makeBarChart('c0_today',['วันนี้ ('+today+')'],todayDatasets.map(d=>({...d,data:d.data})),ch0_today);
+  } else {
+    const cw=document.getElementById('c0_today').parentElement;
+    cw.innerHTML='<div class="no-data">ยังไม่มีข้อมูลวันนี้</div>';
+  }
+
+  // ── กราฟที่ 2: ยอดสะสมราย Series ──
+  const accumMap={};
+  SERIES.forEach(s=>{accumMap[s]=data.filter(b=>b.series===s).length;});
+  const accumTotal=data.length;
+  document.getElementById('t0lbl').textContent=(from||to)?`ช่วงที่เลือก รวม ${accumTotal} คัน`:`ยอดสะสมทั้งหมด รวม ${accumTotal} คัน`;
+  const accumDatasets=SERIES.map((s,i)=>({
+    label:s,
+    data:[accumMap[s]],
+    backgroundColor:COLORS[i%COLORS.length]+'dd',
+    borderColor:COLORS[i%COLORS.length],
+    borderWidth:2,borderRadius:6
+  })).filter(d=>d.data[0]>0);
+  const cw2=document.getElementById('c0').parentElement;
+  if(accumDatasets.length){
+    if(!cw2.querySelector('canvas')){cw2.innerHTML='<canvas id="c0"></canvas>';}
+    ch0=makeBarChart('c0',['ยอดสะสม'],accumDatasets,ch0);
+  } else {
+    cw2.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';
+  }
 }
 function cl0(){document.getElementById('t0f').value='';document.getElementById('t0t').value='';r0();}
 
