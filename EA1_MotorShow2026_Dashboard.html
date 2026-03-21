@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
   :root{
     --bg:#f0f4f2; --surface:#ffffff; --surface2:#f5f8f6; --surface3:#eaf2ee;
@@ -259,7 +260,9 @@
 <div class="last-upd" id="lastUpd"></div>
 
 <script>
+Chart.register(ChartDataLabels);
 const GAS_URL='https://script.google.com/macros/s/AKfycbyr8O3nnNw5C-2IgYzUHR80wXXHCphToGSo6K6sm0zef_bve_M5uUh2Y8yBWnJ6tLaMzg/exec';
+let allData=[],SERIES=[],ch0=null,ch0_today=null;
 const COLORS=['#2196F3','#FF5722','#9C27B0','#FF9800','#00BCD4','#E91E63','#4CAF50','#795548'];
 
 function getURL(){return GAS_URL;}
@@ -311,8 +314,6 @@ function populateSeriesFilters(){
   });
 }
 
-let ch0_today=null;
-
 function makeBarChart(canvasId,labels,datasets,oldChart){
   const ctx=document.getElementById(canvasId);
   if(!ctx)return null;
@@ -321,14 +322,25 @@ function makeBarChart(canvasId,labels,datasets,oldChart){
     responsive:true,maintainAspectRatio:false,
     plugins:{
       legend:{display:false},
-      tooltip:{callbacks:{label:(i)=>i.dataset.label+': '+i.parsed.y+' คัน'}}
+      tooltip:{callbacks:{label:(i)=>i.dataset.label+': '+i.parsed.y+' คัน'}},
+      datalabels:{
+        display:true,
+        anchor:'end',align:'end',
+        color:'#1a2e24',
+        font:{family:'Sarabun',size:12,weight:'bold'},
+        formatter:(v,ctx2)=>{
+          const lbl=ctx2.dataset.label||'';
+          return v>0?lbl+'\n'+v+' คัน':'';
+        }
+      }
     },
     scales:{
       x:{grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun',size:12}}},
       y:{beginAtZero:true,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun',size:12},precision:0}}
     },
-    barPercentage:0.6,
-    categoryPercentage:0.8
+    barPercentage:0.5,
+    categoryPercentage:0.8,
+    layout:{padding:{top:40}}
   }});
 }
 
@@ -368,12 +380,15 @@ function r0(){
     borderColor:COLORS[i%COLORS.length],
     borderWidth:2,borderRadius:6
   })).filter(d=>d.data[0]>0);
-  const cw2=document.getElementById('c0').parentElement;
-  if(accumDatasets.length){
-    if(!cw2.querySelector('canvas')){cw2.innerHTML='<canvas id="c0"></canvas>';}
-    ch0=makeBarChart('c0',['ยอดสะสม'],accumDatasets,ch0);
-  } else {
-    cw2.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';
+  const cw2=document.getElementById('c0')?document.getElementById('c0').parentElement:null;
+  if(cw2){
+    if(accumDatasets.length){
+      if(!cw2.querySelector('canvas')){cw2.innerHTML='<canvas id="c0"></canvas>';}
+      ch0=makeBarChart('c0',['ยอดสะสม'],accumDatasets,ch0);
+    } else {
+      if(ch0){ch0.destroy();ch0=null;}
+      cw2.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';
+    }
   }
 }
 function cl0(){document.getElementById('t0f').value='';document.getElementById('t0t').value='';r0();}
