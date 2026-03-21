@@ -257,7 +257,7 @@
 <script>
 const URL_KEY='ea1_gas_url_2026';
 let allData=[],SERIES=[],ch0=null;
-const COLORS=['#005A44','#00a86b','#007a5e','#3db88a','#70ccaa','#a0e0c8','#b8ccc0','#5a7a6a'];
+const COLORS=['#2196F3','#FF5722','#9C27B0','#FF9800','#00BCD4','#E91E63','#4CAF50','#795548'];
 
 function getURL(){return localStorage.getItem(URL_KEY)||'';}
 function saveURL(){
@@ -325,19 +325,24 @@ function r0(){
   if(!cw.querySelector('canvas')){cw.innerHTML='<canvas id="c0"></canvas>';}
   const datasets=SERIES.map((s,i)=>{
     const col=COLORS[i%COLORS.length];
-    return {label:s,
-      data:dates.map(d=>data.filter(b=>{const bd=b.date?b.date.split(' ')[0]:b.date;return bd===d&&b.series===s;}).length),
-      backgroundColor:col+'cc',borderColor:col,borderWidth:2,borderRadius:4};
-  });
+    const counts=dates.map(d=>data.filter(b=>{const bd=b.date?b.date.split(' ')[0]:b.date;return bd===d&&b.series===s;}).length);
+    const total=counts.reduce((a,b)=>a+b,0);
+    return {label:s+' ('+total+' คัน)',data:counts,backgroundColor:col+'dd',borderColor:col,borderWidth:2,borderRadius:4};
+  }).filter(ds=>ds.data.some(v=>v>0));
   const ctx=document.getElementById('c0').getContext('2d');
   if(ch0)ch0.destroy();
   ch0=new Chart(ctx,{type:'bar',data:{labels:dates,datasets},options:{
     responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#5a7a6a',font:{family:'Sarabun',size:11}}},tooltip:{mode:'index',intersect:false}},
+    plugins:{
+      legend:{labels:{color:'#1a2e24',font:{family:'Sarabun',size:12},padding:16}},
+      tooltip:{mode:'index',intersect:false,callbacks:{footer:(items)=>{const t=items.reduce((s,i)=>s+i.parsed.y,0);return t>0?'รวม: '+t+' คัน':'';}}}
+    },
     scales:{
-      x:{stacked:true,grid:{color:'rgba(0,90,68,.08)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun'}}},
-      y:{stacked:true,grid:{color:'rgba(0,90,68,.08)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun'}}}
-    }
+      x:{stacked:false,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun',size:12}}},
+      y:{stacked:false,beginAtZero:true,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun',size:12},precision:0}}
+    },
+    barPercentage:0.85,
+    categoryPercentage:0.7
   }});
 }
 function cl0(){document.getElementById('t0f').value='';document.getElementById('t0t').value='';r0();}
@@ -414,7 +419,7 @@ async function refresh(){
     renderKPI(); r0(); r1(); r2();
     const n=new Date();
     document.getElementById('lastUpd').textContent=
-      `อัปเดตล่าสุด: ${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')} น. (auto-refresh ทุก 30 วินาที)`;
+      `อัปเดตล่าสุด: ${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')} น. (auto-refresh ทุก 5 นาที)`;
     ss('ok');
   }catch{ss('err');}
 }
@@ -425,7 +430,7 @@ async function refresh(){
   else{ss('err');}
   document.getElementById('boot').style.display='none';
 })();
-setInterval(()=>{if(getURL())refresh();},30000);
+setInterval(()=>{if(getURL())refresh();},300000);
 </script>
 </body>
 </html>
