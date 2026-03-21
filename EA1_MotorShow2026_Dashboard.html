@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EA1 Motor Show 2026 Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
+<style>
+  :root{
+    --bg:#f0f4f2; --surface:#ffffff; --surface2:#f5f8f6; --surface3:#eaf2ee;
+    --border:#d0ddd4; --border2:#b8ccc0;
+    --primary:#005A44; --primary2:#007a5e; --primary-light:#e6f2ee;
+    --accent:#00a86b; --accent2:#007a50;
+    --gold:#c17f00; --goldbg:#fff8e6;
+    --red:#d93025; --warning:#e37400;
+    --text:#1a2e24; --text-muted:#5a7a6a; --text-light:#8aaa9a;
+    --white:#ffffff; --black:#0d1a12;
+    --shadow:0 2px 12px rgba(0,90,68,.07);
+    --shadow-lg:0 8px 28px rgba(0,90,68,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* ── HEADER ── */
+  .header{background:var(--primary);border-bottom:3px solid var(--accent);
+    padding:0 28px;display:flex;align-items:center;justify-content:space-between;
+    height:68px;position:sticky;top:0;z-index:200;box-shadow:0 2px 16px rgba(0,90,68,.25);}
+  .hl{display:flex;align-items:center;gap:14px;}
+  .logo-img{width:36px;height:36px;object-fit:contain;filter:brightness(0) invert(1);}
+  .logo-div{width:1px;height:30px;background:rgba(255,255,255,.25);}
+  .hl h1{font-family:'Kanit',sans-serif;font-size:17px;font-weight:700;color:#fff;}
+  .hl p{font-size:12px;color:rgba(255,255,255,.65);}
+  .hr{display:flex;align-items:center;gap:10px;}
+  .sync-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;
+    font-size:12px;color:rgba(255,255,255,.8);}
+  .sdot{width:7px;height:7px;border-radius:50%;background:#6dffc7;flex-shrink:0;}
+  .sdot.spin{background:#ffd06d;animation:blink 1s infinite;}
+  .sdot.err{background:#ff6b6b;}
+  .live-badge{display:flex;align-items:center;gap:6px;background:rgba(0,229,160,.15);
+    border:1px solid rgba(0,229,160,.4);border-radius:20px;padding:5px 12px;
+    font-size:12px;font-weight:600;color:#6dffc7;}
+  .ldot{width:7px;height:7px;border-radius:50%;background:#6dffc7;animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ── SETUP BANNER ── */
+  .setup-banner{background:#fff8e6;border:1.5px solid #ffd06d;border-left:4px solid var(--warning);
+    border-radius:12px;padding:16px 20px;margin:18px 28px 0;}
+  .setup-banner h3{font-family:'Kanit',sans-serif;font-size:14px;color:var(--warning);margin-bottom:8px;}
+  .su-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .su-lbl{font-size:13px;color:#7a5a20;white-space:nowrap;}
+  .url-inp{flex:1;min-width:240px;background:#fff;border:1.5px solid var(--border);
+    border-radius:9px;padding:9px 13px;color:var(--text);font-size:13px;
+    font-family:'Sarabun',sans-serif;}
+  .url-inp:focus{outline:none;border-color:var(--primary);}
+  .url-inp::placeholder{color:var(--text-light);}
+  .btn-su{background:var(--primary);color:#fff;border:none;border-radius:9px;
+    padding:9px 18px;font-weight:700;font-size:13px;font-family:'Kanit',sans-serif;
+    cursor:pointer;white-space:nowrap;}
+  .btn-su:hover{background:var(--primary2);}
+
+  /* ── KPIs ── */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 28px 0;}
+  .kc{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:18px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+  .kc::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;
+    background:linear-gradient(180deg,var(--primary),var(--accent));}
+  .kc-lbl{font-size:11px;color:var(--text-muted);text-transform:uppercase;
+    letter-spacing:.05em;margin-bottom:6px;padding-left:8px;}
+  .kc-val{font-family:'Kanit',sans-serif;font-size:34px;font-weight:700;
+    color:var(--primary);line-height:1;padding-left:8px;}
+  .kc-sub{font-size:11px;color:var(--text-muted);margin-top:3px;padding-left:8px;}
+
+  /* ── TABS ── */
+  .tw{padding:18px 28px 0;}
+  .tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:4px;width:fit-content;box-shadow:var(--shadow);}
+  .tb{padding:9px 22px;border-radius:9px;border:none;background:transparent;
+    color:var(--text-muted);font-family:'Kanit',sans-serif;font-size:13px;font-weight:500;
+    cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .tb.on{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(0,90,68,.25);}
+
+  /* ── CONTENT ── */
+  .tc{display:none;padding:18px 28px;}
+  .tc.on{display:block;}
+
+  /* ── FILTERS ── */
+  .fr{display:flex;align-items:center;gap:10px;background:var(--surface);
+    border:1px solid var(--border);border-radius:12px;padding:12px 16px;
+    margin-bottom:16px;flex-wrap:wrap;box-shadow:var(--shadow);}
+  .fl{font-size:12px;color:var(--text-muted);font-weight:600;white-space:nowrap;}
+  .fr input,.fr select{background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;padding:7px 11px;color:var(--text);font-family:'Sarabun',sans-serif;
+    font-size:13px;cursor:pointer;transition:border-color .2s;}
+  .fr input:focus,.fr select:focus{outline:none;border-color:var(--primary);}
+  .fr select option{background:#fff;color:var(--text);}
+  .btn-go{background:var(--primary);color:#fff;border:none;border-radius:8px;
+    padding:7px 18px;font-weight:700;font-size:12px;font-family:'Kanit',sans-serif;
+    cursor:pointer;transition:background .2s;}
+  .btn-go:hover{background:var(--primary2);}
+  .btn-cls{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);
+    border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;transition:all .2s;}
+  .btn-cls:hover{border-color:var(--primary);color:var(--primary);}
+  .btn-ref{background:var(--primary-light);border:1px solid rgba(0,90,68,.25);
+    color:var(--primary);border-radius:8px;padding:7px 14px;font-size:12px;
+    font-weight:600;font-family:'Kanit',sans-serif;cursor:pointer;margin-left:auto;
+    transition:background .2s;}
+  .btn-ref:hover{background:rgba(0,90,68,.15);}
+
+  /* ── CHART CARD ── */
+  .cc{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:22px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .cc-title{font-family:'Kanit',sans-serif;font-size:14px;font-weight:600;
+    color:var(--text);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
+  .cc-sub{font-size:12px;color:var(--text-muted);}
+  .cw{position:relative;height:300px;}
+
+  /* ── TABLE ── */
+  .tcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    overflow:hidden;box-shadow:var(--shadow);}
+  .th-row{padding:15px 20px;border-bottom:1px solid var(--border);
+    font-family:'Kanit',sans-serif;font-size:14px;font-weight:600;color:var(--text);
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface2);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:var(--primary);color:#fff;font-weight:600;font-size:11px;
+    text-transform:uppercase;letter-spacing:.04em;padding:11px 14px;text-align:left;
+    border-bottom:2px solid var(--primary2);white-space:nowrap;}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--primary-light);}
+  tbody td{padding:11px 14px;}
+  .rb{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:50%;font-weight:700;font-size:11px;background:var(--surface3);color:var(--text-muted);}
+  .rb.r1{background:var(--goldbg);color:var(--gold);border:1px solid #e6c060;}
+  .rb.r2{background:#f5f5f5;color:#666;border:1px solid #ccc;}
+  .rb.r3{background:#fdf0e8;color:#a05020;border:1px solid #e0b090;}
+  .tv{font-family:'Kanit',sans-serif;font-size:17px;font-weight:700;color:var(--primary);}
+  .bar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--accent));margin-top:4px;}
+  .no-data{text-align:center;padding:48px;color:var(--text-muted);font-size:13px;}
+
+  /* ── BOOT ── */
+  #boot{position:fixed;inset:0;z-index:9000;background:var(--primary);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
+  .boot-logo{width:64px;height:64px;object-fit:contain;filter:brightness(0) invert(1);}
+  .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.25);
+    border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .bt{font-family:'Kanit',sans-serif;font-size:14px;color:rgba(255,255,255,.7);}
+
+  .last-upd{font-size:11px;color:var(--text-muted);padding:4px 28px 16px;text-align:right;}
+
+  @media(max-width:768px){
+    .kpi-row{grid-template-columns:1fr 1fr;padding:14px;}
+    .tw,.tc{padding:14px;} .header{padding:0 16px;}
+    .setup-banner{margin:14px;} .kc-val{font-size:26px;}
+  }
+  @media(max-width:480px){.kpi-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="boot">
+  <img class="boot-logo" src="data:image/png;base64,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" alt="EA1">
+  <div class="sp"></div>
+  <div class="bt">กำลังโหลดข้อมูล...</div>
+</div>
+
+<div class="header">
+  <div class="hl">
+    <img class="logo-img" src="data:image/png;base64,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" alt="EA1">
+    <div class="logo-div"></div>
+    <div>
+      <h1>EA1 Motor Show 2026 Dashboard</h1>
+      <p>Executive Dashboard — ยอดจองรถยนต์ Real-Time</p>
+    </div>
+  </div>
+  <div class="hr">
+    <div class="sync-pill"><div class="sdot spin" id="sdot"></div><span id="stxt">กำลังโหลด...</span></div>
+    <div class="live-badge"><div class="ldot"></div>Live</div>
+  </div>
+</div>
+
+<div class="setup-banner" id="setupBanner">
+  <h3>⚙️ ใส่ Google Apps Script URL เพื่อเชื่อมต่อข้อมูล</h3>
+  <div class="su-row">
+    <span class="su-lbl">Web App URL:</span>
+    <input type="url" class="url-inp" id="urlInput" placeholder="https://script.google.com/macros/s/.../exec">
+    <button class="btn-su" onclick="saveURL()">เชื่อมต่อ</button>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kc"><div class="kc-lbl">ยอดจองรวมทั้งหมด</div><div class="kc-val" id="k0">—</div><div class="kc-sub">คัน (ทุก Series)</div></div>
+  <div class="kc"><div class="kc-lbl">ยอดจองวันนี้</div><div class="kc-val" id="k1">—</div><div class="kc-sub">คัน</div></div>
+  <div class="kc"><div class="kc-lbl">Top Dealer</div><div class="kc-val" id="k2" style="font-size:15px;padding-top:6px;">—</div><div class="kc-sub" id="k2s"></div></div>
+  <div class="kc"><div class="kc-lbl">Series ยอดนิยม</div><div class="kc-val" id="k3" style="font-size:20px;padding-top:8px;">—</div><div class="kc-sub" id="k3s"></div></div>
+</div>
+
+<div class="tw">
+  <div class="tabs">
+    <button class="tb on" onclick="sw(0)">📊 ยอดจองรายวัน</button>
+    <button class="tb" onclick="sw(1)">🏢 ราย Dealer</button>
+    <button class="tb" onclick="sw(2)">👤 ราย พนักงานขาย</button>
+  </div>
+</div>
+
+<div class="tc on" id="t0">
+  <div class="fr">
+    <span class="fl">ช่วงวันที่:</span>
+    <input type="date" id="t0f"><span style="color:var(--text-muted)">ถึง</span><input type="date" id="t0t">
+    <button class="btn-go" onclick="r0()">กรอง</button>
+    <button class="btn-cls" onclick="cl0()">รีเซ็ต</button>
+    <button class="btn-ref" onclick="refresh()">↻ โหลดใหม่</button>
+  </div>
+  <div class="cc">
+    <div class="cc-title"><span>ยอดจองรายวัน แยกตาม Series</span><span class="cc-sub" id="t0lbl"></span></div>
+    <div class="cw"><canvas id="c0"></canvas></div>
+  </div>
+</div>
+
+<div class="tc" id="t1">
+  <div class="fr">
+    <span class="fl">ช่วงวันที่:</span>
+    <input type="date" id="t1f"><span style="color:var(--text-muted)">ถึง</span><input type="date" id="t1t">
+    <span class="fl" style="margin-left:6px">Series:</span>
+    <select id="t1s"><option value="">All Series</option></select>
+    <button class="btn-go" onclick="r1()">กรอง</button>
+    <button class="btn-cls" onclick="cl1()">รีเซ็ต</button>
+    <button class="btn-ref" onclick="refresh()">↻ โหลดใหม่</button>
+  </div>
+  <div class="tcard">
+    <div class="th-row"><span>ยอดจองราย Dealer</span><span class="cc-sub" id="t1cnt"></span></div>
+    <div id="t1tbl"></div>
+  </div>
+</div>
+
+<div class="tc" id="t2">
+  <div class="fr">
+    <span class="fl">ช่วงวันที่:</span>
+    <input type="date" id="t2f"><span style="color:var(--text-muted)">ถึง</span><input type="date" id="t2t">
+    <span class="fl" style="margin-left:6px">Series:</span>
+    <select id="t2s"><option value="">All Series</option></select>
+    <button class="btn-go" onclick="r2()">กรอง</button>
+    <button class="btn-cls" onclick="cl2()">รีเซ็ต</button>
+    <button class="btn-ref" onclick="refresh()">↻ โหลดใหม่</button>
+  </div>
+  <div class="tcard">
+    <div class="th-row"><span>ยอดจองราย พนักงานขาย</span><span class="cc-sub" id="t2cnt"></span></div>
+    <div id="t2tbl"></div>
+  </div>
+</div>
+<div class="last-upd" id="lastUpd"></div>
+
+<script>
+const URL_KEY='ea1_gas_url_2026';
+let allData=[],SERIES=[],ch0=null;
+const COLORS=['#005A44','#00a86b','#007a5e','#3db88a','#70ccaa','#a0e0c8','#b8ccc0','#5a7a6a'];
+
+function getURL(){return localStorage.getItem(URL_KEY)||'';}
+function saveURL(){
+  const v=document.getElementById('urlInput').value.trim();
+  if(!v.startsWith('https://script.google.com')){alert('URL ไม่ถูกต้อง');return;}
+  localStorage.setItem(URL_KEY,v);
+  document.getElementById('setupBanner').style.display='none';
+  refresh();
+}
+
+function ss(s){
+  const d=document.getElementById('sdot'),t=document.getElementById('stxt');
+  if(s==='ok'){d.className='sdot';t.textContent='Google Sheets ✓';}
+  else if(s==='load'){d.className='sdot spin';t.textContent='กำลังโหลด...';}
+  else{d.className='sdot err';t.textContent='เชื่อมต่อไม่ได้';}
+}
+
+function nowD(){const n=new Date(),p=v=>String(v).padStart(2,'0');return `${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()}`;}
+function toISO(dd){if(!dd)return'';const[d,m,y]=dd.split('/');return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+
+function filterData(data,fromISO,toISO,series){
+  return data.filter(b=>{
+    const bd=toISO(b.date?b.date.split(' ')[0]:b.date);
+    if(fromISO&&bd<fromISO)return false;
+    if(toISO&&bd>toISO)return false;
+    if(series&&b.series!==series)return false;
+    return true;
+  });
+}
+
+function renderKPI(){
+  document.getElementById('k0').textContent=allData.length;
+  document.getElementById('k1').textContent=allData.filter(b=>{
+    const d=b.date?b.date.split(' ')[0]:b.date; return d===nowD();
+  }).length;
+  const dm={};allData.forEach(b=>{dm[b.dealer]=(dm[b.dealer]||0)+1;});
+  const ds=Object.entries(dm).sort((a,b)=>b[1]-a[1]);
+  if(ds.length){
+    document.getElementById('k2').textContent=ds[0][0].replace(/DEEPAL_|Deepal_/g,'').replaceAll('_',' ');
+    document.getElementById('k2s').textContent=ds[0][1]+' คัน';
+  }
+  const sm={};allData.forEach(b=>{sm[b.series]=(sm[b.series]||0)+1;});
+  const ss2=Object.entries(sm).sort((a,b)=>b[1]-a[1]);
+  if(ss2.length){document.getElementById('k3').textContent=ss2[0][0];document.getElementById('k3s').textContent=ss2[0][1]+' คัน';}
+}
+
+function populateSeriesFilters(){
+  ['t1s','t2s'].forEach(id=>{
+    const sel=document.getElementById(id);
+    const cur=sel.value;
+    sel.innerHTML='<option value="">All Series</option>';
+    SERIES.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+    sel.value=cur;
+  });
+}
+
+function r0(){
+  const from=document.getElementById('t0f').value,to=document.getElementById('t0t').value;
+  const data=filterData(allData,from,to,'');
+  const dset=new Set();data.forEach(b=>{const d=b.date?b.date.split(' ')[0]:b.date;dset.add(d);});
+  const dates=[...dset].sort((a,b)=>toISO(a).localeCompare(toISO(b)));
+  document.getElementById('t0lbl').textContent=`รวม ${data.length} คัน`;
+  const cw=document.getElementById('c0').parentElement;
+  if(!dates.length){cw.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';return;}
+  if(!cw.querySelector('canvas')){cw.innerHTML='<canvas id="c0"></canvas>';}
+  const datasets=SERIES.map((s,i)=>{
+    const col=COLORS[i%COLORS.length];
+    return {label:s,
+      data:dates.map(d=>data.filter(b=>{const bd=b.date?b.date.split(' ')[0]:b.date;return bd===d&&b.series===s;}).length),
+      backgroundColor:col+'cc',borderColor:col,borderWidth:2,borderRadius:4};
+  });
+  const ctx=document.getElementById('c0').getContext('2d');
+  if(ch0)ch0.destroy();
+  ch0=new Chart(ctx,{type:'bar',data:{labels:dates,datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#5a7a6a',font:{family:'Sarabun',size:11}}},tooltip:{mode:'index',intersect:false}},
+    scales:{
+      x:{stacked:true,grid:{color:'rgba(0,90,68,.08)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun'}}},
+      y:{stacked:true,grid:{color:'rgba(0,90,68,.08)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun'}}}
+    }
+  }});
+}
+function cl0(){document.getElementById('t0f').value='';document.getElementById('t0t').value='';r0();}
+
+function r1(){
+  const from=document.getElementById('t1f').value,to=document.getElementById('t1t').value,ser=document.getElementById('t1s').value;
+  const data=filterData(allData,from,to,ser);
+  const map={};
+  data.forEach(b=>{if(!map[b.dealer])map[b.dealer]={t:0,s:{}};map[b.dealer].t++;map[b.dealer].s[b.series]=(map[b.dealer].s[b.series]||0)+1;});
+  const sorted=Object.entries(map).sort((a,b)=>b[1].t-a[1].t);
+  const mx=sorted.length?sorted[0][1].t:1;
+  document.getElementById('t1cnt').textContent=`${sorted.length} Dealer | ${data.length} คัน`;
+  const sh=ser?[ser]:SERIES;
+  const el=document.getElementById('t1tbl');
+  if(!sorted.length){el.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';return;}
+  let html=`<table><thead><tr><th>#</th><th>Dealer</th>${sh.map(s=>`<th>${s}</th>`).join('')}<th>รวม</th></tr></thead><tbody>`;
+  sorted.forEach(([dl,v],i)=>{
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const pct=Math.round((v.t/mx)*100);
+    const sn=dl.replace(/DEEPAL_|Deepal_/g,'').replaceAll('_',' ');
+    html+=`<tr><td><span class="rb ${rc}">${i+1}</span></td>
+      <td><div style="font-weight:600">${sn}</div><div style="font-size:11px;color:var(--text-muted)">${dl}</div></td>
+      ${sh.map(s=>`<td style="text-align:center">${v.s[s]||'—'}</td>`).join('')}
+      <td><div class="tv">${v.t}</div><div class="bar" style="width:${pct}%"></div></td></tr>`;
+  });
+  el.innerHTML=html+'</tbody></table>';
+}
+function cl1(){document.getElementById('t1f').value='';document.getElementById('t1t').value='';document.getElementById('t1s').value='';r1();}
+
+function r2(){
+  const from=document.getElementById('t2f').value,to=document.getElementById('t2t').value,ser=document.getElementById('t2s').value;
+  const data=filterData(allData,from,to,ser);
+  const map={};
+  data.forEach(b=>{const k=b.sc+'||'+b.dealer;if(!map[k])map[k]={sc:b.sc,dealer:b.dealer,t:0,s:{}};map[k].t++;map[k].s[b.series]=(map[k].s[b.series]||0)+1;});
+  const sorted=Object.values(map).sort((a,b)=>b.t-a.t);
+  const mx=sorted.length?sorted[0].t:1;
+  document.getElementById('t2cnt').textContent=`${sorted.length} คน | ${data.length} คัน`;
+  const sh=ser?[ser]:SERIES;
+  const el=document.getElementById('t2tbl');
+  if(!sorted.length){el.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';return;}
+  let html=`<table><thead><tr><th>#</th><th>พนักงานขาย</th><th>Dealer</th>${sh.map(s=>`<th>${s}</th>`).join('')}<th>รวม</th></tr></thead><tbody>`;
+  sorted.forEach((v,i)=>{
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const pct=Math.round((v.t/mx)*100);
+    const sn=v.dealer.replace(/DEEPAL_|Deepal_/g,'').replaceAll('_',' ');
+    html+=`<tr><td><span class="rb ${rc}">${i+1}</span></td>
+      <td style="font-weight:600">${v.sc}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${sn}</td>
+      ${sh.map(s=>`<td style="text-align:center">${v.s[s]||'—'}</td>`).join('')}
+      <td><div class="tv">${v.t}</div><div class="bar" style="width:${pct}%"></div></td></tr>`;
+  });
+  el.innerHTML=html+'</tbody></table>';
+}
+function cl2(){document.getElementById('t2f').value='';document.getElementById('t2t').value='';document.getElementById('t2s').value='';r2();}
+
+function sw(idx){
+  document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('on',i===idx));
+  document.querySelectorAll('.tc').forEach((c,i)=>c.classList.toggle('on',i===idx));
+  if(idx===0)r0();else if(idx===1)r1();else r2();
+}
+
+async function refresh(){
+  const url=getURL();
+  if(!url){ss('err');document.getElementById('boot').style.display='none';return;}
+  ss('load');
+  try{
+    const res=await fetch(url,{method:'GET',redirect:'follow'});
+    const json=await res.json();
+    allData=json.records||[];
+    if(json.masterdata&&json.masterdata.cars){
+      SERIES=Object.keys(json.masterdata.cars);
+      populateSeriesFilters();
+    }
+    renderKPI(); r0(); r1(); r2();
+    const n=new Date();
+    document.getElementById('lastUpd').textContent=
+      `อัปเดตล่าสุด: ${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')} น. (auto-refresh ทุก 30 วินาที)`;
+    ss('ok');
+  }catch{ss('err');}
+}
+
+(async()=>{
+  const saved=getURL();
+  if(saved){document.getElementById('setupBanner').style.display='none';document.getElementById('urlInput').value=saved;await refresh();}
+  else{ss('err');}
+  document.getElementById('boot').style.display='none';
+})();
+setInterval(()=>{if(getURL())refresh();},30000);
+</script>
+</body>
+</html>
