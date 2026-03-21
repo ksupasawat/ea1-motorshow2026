@@ -183,7 +183,7 @@
   </div>
 </div>
 
-<div class="setup-banner" id="setupBanner">
+<div class="setup-banner" id="setupBanner" style="display:none">
   <h3>⚙️ ใส่ Google Apps Script URL เพื่อเชื่อมต่อข้อมูล</h3>
   <div class="su-row">
     <span class="su-lbl">Web App URL:</span>
@@ -259,18 +259,11 @@
 <div class="last-upd" id="lastUpd"></div>
 
 <script>
-const URL_KEY='ea1_gas_url_2026';
-let allData=[],SERIES=[],ch0=null;
+const GAS_URL='https://script.google.com/macros/s/AKfycbyr8O3nnNw5C-2IgYzUHR80wXXHCphToGSo6K6sm0zef_bve_M5uUh2Y8yBWnJ6tLaMzg/exec';
 const COLORS=['#2196F3','#FF5722','#9C27B0','#FF9800','#00BCD4','#E91E63','#4CAF50','#795548'];
 
-function getURL(){return localStorage.getItem(URL_KEY)||'';}
-function saveURL(){
-  const v=document.getElementById('urlInput').value.trim();
-  if(!v.startsWith('https://script.google.com')){alert('URL ไม่ถูกต้อง');return;}
-  localStorage.setItem(URL_KEY,v);
-  document.getElementById('setupBanner').style.display='none';
-  refresh();
-}
+function getURL(){return GAS_URL;}
+function saveURL(){}
 
 function ss(s){
   const d=document.getElementById('sdot'),t=document.getElementById('stxt');
@@ -463,9 +456,7 @@ async function refresh(){
 }
 
 (async()=>{
-  const saved=getURL();
-  if(saved){document.getElementById('setupBanner').style.display='none';document.getElementById('urlInput').value=saved;await refresh();}
-  else{ss('err');}
+  await refresh();
   document.getElementById('boot').style.display='none';
 })();
 setInterval(()=>{if(getURL())refresh();},300000);

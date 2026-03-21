@@ -225,7 +225,7 @@
 
 <div class="container">
 
-  <div class="setup-banner" id="setupBanner">
+  <div class="setup-banner" id="setupBanner" style="display:none">
     <h3>⚙️ ตั้งค่าครั้งแรก — เชื่อมต่อ Google Sheets</h3>
     <div class="setup-steps">
       <div class="step"><div class="step-num">1</div>
@@ -325,23 +325,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const URL_KEY = 'ea1_gas_url_2026';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyr8O3nnNw5C-2IgYzUHR80wXXHCphToGSo6K6sm0zef_bve_M5uUh2Y8yBWnJ6tLaMzg/exec';
 let MASTER = { cars:{}, dealers:[], sc:{} };
 let pendingRec = null;
 
 /* ── URL ── */
-function getURL(){ return localStorage.getItem(URL_KEY)||''; }
-function saveURL(){
-  const v = document.getElementById('urlInput').value.trim();
-  if(!v.startsWith('https://script.google.com')){
-    showToast('URL ไม่ถูกต้อง','error'); return;
-  }
-  localStorage.setItem(URL_KEY, v);
-  document.getElementById('urlOk').style.display='flex';
-  showToast('✓ บันทึก URL สำเร็จ','ok');
-  setTimeout(()=>{ document.getElementById('setupBanner').style.display='none'; },1200);
-  loadAll();
-}
+function getURL(){ return GAS_URL; }
+function saveURL(){}
 
 /* ── API ── */
 async function apiGet(){
@@ -533,12 +523,7 @@ async function loadAll(){
 
 /* ── BOOT ── */
 (async()=>{
-  const saved=getURL();
-  if(saved){
-    document.getElementById('setupBanner').style.display='none';
-    document.getElementById('urlInput').value=saved;
-    await loadAll();
-  } else { ss('err'); }
+  await loadAll();
   document.getElementById('boot').style.display='none';
 })();
 /* auto-refresh ทุก 60 วินาที และหยุดถ้ากำลังกรอกฟอร์มอยู่ */
@@ -547,7 +532,7 @@ document.getElementById('f').addEventListener('input', ()=>{ _lastActivity = Dat
 document.getElementById('f').addEventListener('focus', ()=>{ _lastActivity = Date.now(); }, true);
 setInterval(()=>{
   const idleSec = (Date.now() - _lastActivity) / 1000;
-  if(getURL() && idleSec >= 30) loadAll();
+  if(idleSec >= 30) loadAll();
 }, 60000);
 </script>
 </body>
