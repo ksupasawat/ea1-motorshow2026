@@ -72,14 +72,14 @@
     letter-spacing:.05em;margin-bottom:6px;padding-left:8px;}
   .kc-val{font-family:'Kanit',sans-serif;font-size:34px;font-weight:700;
     color:var(--primary);line-height:1;padding-left:8px;}
-  .kc-sub{font-size:11px;color:var(--text-muted);margin-top:3px;padding-left:8px;}
+  .kc-sub{font-size:13px;color:var(--text-muted);margin-top:3px;padding-left:8px;}
 
   /* ── TABS ── */
   .tw{padding:18px 28px 0;}
   .tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);
     border-radius:12px;padding:4px;width:fit-content;box-shadow:var(--shadow);}
-  .tb{padding:9px 22px;border-radius:9px;border:none;background:transparent;
-    color:var(--text-muted);font-family:'Kanit',sans-serif;font-size:13px;font-weight:500;
+  .tb{padding:10px 24px;border-radius:9px;border:none;background:transparent;
+    color:var(--text-muted);font-family:'Kanit',sans-serif;font-size:15px;font-weight:500;
     cursor:pointer;transition:all .2s;white-space:nowrap;}
   .tb.on{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(0,90,68,.25);}
 
@@ -91,7 +91,7 @@
   .fr{display:flex;align-items:center;gap:10px;background:var(--surface);
     border:1px solid var(--border);border-radius:12px;padding:12px 16px;
     margin-bottom:16px;flex-wrap:wrap;box-shadow:var(--shadow);}
-  .fl{font-size:12px;color:var(--text-muted);font-weight:600;white-space:nowrap;}
+  .fl{font-size:14px;color:var(--text-muted);font-weight:600;white-space:nowrap;}
   .fr input,.fr select{background:var(--surface2);border:1px solid var(--border);
     border-radius:8px;padding:7px 11px;color:var(--text);font-family:'Sarabun',sans-serif;
     font-size:13px;cursor:pointer;transition:border-color .2s;}
@@ -113,7 +113,7 @@
   /* ── CHART CARD ── */
   .cc{background:var(--surface);border:1px solid var(--border);border-radius:14px;
     padding:22px;margin-bottom:16px;box-shadow:var(--shadow);}
-  .cc-title{font-family:'Kanit',sans-serif;font-size:14px;font-weight:600;
+  .cc-title{font-family:'Kanit',sans-serif;font-size:16px;font-weight:600;
     color:var(--text);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
   .cc-sub{font-size:12px;color:var(--text-muted);}
   .cw{position:relative;height:300px;}
@@ -126,19 +126,19 @@
     display:flex;align-items:center;justify-content:space-between;
     background:var(--surface2);}
   table{width:100%;border-collapse:collapse;font-size:13px;}
-  thead th{background:var(--primary);color:#fff;font-weight:600;font-size:11px;
+  thead th{background:var(--primary);color:#fff;font-weight:600;font-size:13px;
     text-transform:uppercase;letter-spacing:.04em;padding:11px 14px;text-align:left;
     border-bottom:2px solid var(--primary2);white-space:nowrap;}
   tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
   tbody tr:last-child{border-bottom:none;}
   tbody tr:hover{background:var(--primary-light);}
-  tbody td{padding:11px 14px;}
+  tbody td{padding:12px 16px;font-size:14px;}
   .rb{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
     border-radius:50%;font-weight:700;font-size:11px;background:var(--surface3);color:var(--text-muted);}
   .rb.r1{background:var(--goldbg);color:var(--gold);border:1px solid #e6c060;}
   .rb.r2{background:#f5f5f5;color:#666;border:1px solid #ccc;}
   .rb.r3{background:#fdf0e8;color:#a05020;border:1px solid #e0b090;}
-  .tv{font-family:'Kanit',sans-serif;font-size:17px;font-weight:700;color:var(--primary);}
+  .tv{font-family:'Kanit',sans-serif;font-size:20px;font-weight:700;color:var(--primary);}
   .bar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--primary),var(--accent));margin-top:4px;}
   .no-data{text-align:center;padding:48px;color:var(--text-muted);font-size:13px;}
 
@@ -223,6 +223,12 @@
   <div class="cc">
     <div class="cc-title"><span>ยอดจองสะสม ราย Series</span><span class="cc-sub" id="t0lbl"></span></div>
     <div class="cw"><canvas id="c0"></canvas></div>
+  </div>
+  <div class="cc">
+    <div class="cc-title"><span>สัดส่วนยอดจองสะสม ราย Series</span><span class="cc-sub" id="t0lbl_pie"></span></div>
+    <div style="position:relative;height:320px;display:flex;align-items:center;justify-content:center">
+      <canvas id="c0_pie" style="max-height:320px"></canvas>
+    </div>
   </div>
 </div>
 
@@ -314,7 +320,7 @@ function populateSeriesFilters(){
   });
 }
 
-function makeBarChart(canvasId,labels,datasets,oldChart){
+function makeBarChart(canvasId,labels,datasets,oldChart,drillData){
   const ctx=document.getElementById(canvasId);
   if(!ctx)return null;
   if(oldChart)oldChart.destroy();
@@ -322,26 +328,66 @@ function makeBarChart(canvasId,labels,datasets,oldChart){
     responsive:true,maintainAspectRatio:false,
     plugins:{
       legend:{display:false},
-      tooltip:{callbacks:{label:(i)=>i.dataset.label+': '+i.parsed.y+' คัน'}},
-      datalabels:{
-        display:true,
-        anchor:'end',align:'end',
-        color:'#1a2e24',
-        font:{family:'Sarabun',size:12,weight:'bold'},
-        formatter:(v,ctx2)=>{
-          const lbl=ctx2.dataset.label||'';
-          return v>0?lbl+'\n'+v+' คัน':'';
-        }
-      }
+      tooltip:{callbacks:{label:(i)=>i.dataset.label+': '+i.parsed.y+' คัน'+(drillData?' (คลิกดู Model)':'')}},
+      datalabels:{display:true,anchor:'end',align:'end',color:'#1a2e24',
+        font:{family:'Sarabun',size:13,weight:'bold'},
+        formatter:(v,c)=>v>0?c.dataset.label+'\n'+v+' คัน':''}
     },
     scales:{
-      x:{grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun',size:12}}},
-      y:{beginAtZero:true,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun',size:12},precision:0}}
+      x:{grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',font:{family:'Sarabun',size:13}}},
+      y:{beginAtZero:true,grid:{color:'rgba(0,90,68,.06)'},ticks:{color:'#5a7a6a',stepSize:1,font:{family:'Sarabun',size:13},precision:0}}
     },
-    barPercentage:0.5,
-    categoryPercentage:0.8,
-    layout:{padding:{top:40}}
+    barPercentage:0.5,categoryPercentage:0.8,layout:{padding:{top:40}},
+    onClick:drillData?(_,els)=>{
+      if(!els.length)return;
+      const s=datasets[els[0].datasetIndex].label;
+      const models=drillData[s];
+      if(!models||!Object.keys(models).length)return;
+      showModelModal(s,models);
+    }:undefined,
+    onHover:drillData?(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default';}:undefined
   }});
+}
+
+function showModelModal(series,models){
+  const existing=document.getElementById('modelModal');
+  if(existing)existing.remove();
+  const sorted=Object.entries(models).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0);
+  const color=COLORS[SERIES.indexOf(series)%COLORS.length];
+  const rows=sorted.map(([m,c])=>`
+    <tr>
+      <td style="padding:10px 14px;font-size:14px;font-weight:600">${m}</td>
+      <td style="padding:10px 14px;text-align:center;font-size:17px;font-weight:700;color:${color}">${c}</td>
+      <td style="padding:10px 14px;width:160px">
+        <div style="height:8px;background:#e8f0ec;border-radius:4px">
+          <div style="height:100%;width:${Math.round(c/total*100)}%;background:${color};border-radius:4px"></div>
+        </div>
+        <div style="font-size:12px;color:#888;margin-top:3px">${Math.round(c/total*100)}%</div>
+      </td>
+    </tr>`).join('');
+  const modal=document.createElement('div');
+  modal.id='modelModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML=`<div style="background:#fff;border-radius:16px;padding:28px;min-width:380px;max-width:500px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-family:'Kanit',sans-serif;font-size:20px;font-weight:700;color:${color}">Series ${series}</div>
+        <div style="font-size:13px;color:#888;margin-top:2px">ยอดจองราย Model — รวม ${total} คัน</div>
+      </div>
+      <button onclick="document.getElementById('modelModal').remove()" style="background:#f0f4f1;border:none;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer;color:#555">×</button>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:8px 14px;font-size:12px;color:#888;text-transform:uppercase;border-bottom:2px solid #f0f0f0">Model</th>
+        <th style="text-align:center;padding:8px 14px;font-size:12px;color:#888;text-transform:uppercase;border-bottom:2px solid #f0f0f0">คัน</th>
+        <th style="padding:8px 14px;font-size:12px;color:#888;text-transform:uppercase;border-bottom:2px solid #f0f0f0">สัดส่วน</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  document.body.appendChild(modal);
 }
 
 function r0(){
@@ -361,11 +407,18 @@ function r0(){
     borderColor:COLORS[i%COLORS.length],
     borderWidth:2,borderRadius:6
   })).filter(d=>d.data[0]>0);
-  if(todayDatasets.length){
-    ch0_today=makeBarChart('c0_today',['วันนี้ ('+today+')'],todayDatasets.map(d=>({...d,data:d.data})),ch0_today);
-  } else {
-    const cw=document.getElementById('c0_today').parentElement;
-    cw.innerHTML='<div class="no-data">ยังไม่มีข้อมูลวันนี้</div>';
+  const cwToday=document.getElementById('c0_today')?document.getElementById('c0_today').parentElement:null;
+  if(cwToday){
+    if(todayDatasets.length){
+      if(!cwToday.querySelector('canvas')){cwToday.innerHTML='<canvas id="c0_today"></canvas>';}
+      const todayModelMap={};
+    SERIES.forEach(s=>{todayModelMap[s]={};});
+    todayData.forEach(b=>{const m=b.model||'—';todayModelMap[b.series][m]=(todayModelMap[b.series][m]||0)+1;});
+    ch0_today=makeBarChart('c0_today',['วันนี้ ('+today+')'],todayDatasets,ch0_today,todayModelMap);
+    } else {
+      if(ch0_today){ch0_today.destroy();ch0_today=null;}
+      cwToday.innerHTML='<div class="no-data">ยังไม่มีข้อมูลวันนี้</div>';
+    }
   }
 
   // ── กราฟที่ 2: ยอดสะสมราย Series ──
@@ -384,10 +437,39 @@ function r0(){
   if(cw2){
     if(accumDatasets.length){
       if(!cw2.querySelector('canvas')){cw2.innerHTML='<canvas id="c0"></canvas>';}
-      ch0=makeBarChart('c0',['ยอดสะสม'],accumDatasets,ch0);
+      const accumModelMap={};
+      SERIES.forEach(s=>{accumModelMap[s]={};});
+      data.forEach(b=>{const m=b.model||'—';accumModelMap[b.series][m]=(accumModelMap[b.series][m]||0)+1;});
+      ch0=makeBarChart('c0',['ยอดสะสม'],accumDatasets,ch0,accumModelMap);
     } else {
       if(ch0){ch0.destroy();ch0=null;}
       cw2.innerHTML='<div class="no-data">ไม่มีข้อมูลในช่วงที่เลือก</div>';
+    }
+  }
+
+  // ── Pie Chart: สัดส่วนยอดสะสม ──
+  const pieLabels=accumDatasets.map(d=>d.label);
+  const pieValues=accumDatasets.map(d=>d.data[0]);
+  const pieColors=accumDatasets.map(d=>d.backgroundColor);
+  document.getElementById('t0lbl_pie').textContent=(from||to)?`ช่วงที่เลือก`:`ยอดสะสมทั้งหมด`;
+  const pieCtx=document.getElementById('c0_pie');
+  if(pieCtx){
+    if(window._ch0_pie)window._ch0_pie.destroy();
+    if(pieValues.some(v=>v>0)){
+      window._ch0_pie=new Chart(pieCtx,{type:'doughnut',
+        data:{labels:pieLabels,datasets:[{data:pieValues,backgroundColor:pieColors,borderColor:'#fff',borderWidth:3,hoverOffset:8}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{
+            legend:{position:'right',labels:{color:'#1a2e24',font:{family:'Sarabun',size:14},padding:16,usePointStyle:true}},
+            tooltip:{callbacks:{label:(i)=>` ${i.label}: ${i.parsed} คัน (${Math.round(i.parsed/accumTotal*100)}%)`}},
+            datalabels:{display:true,color:'#fff',font:{family:'Sarabun',size:13,weight:'bold'},
+              formatter:(v,c)=>{const pct=Math.round(v/accumTotal*100);return pct>=5?pct+'%':'';}
+            }
+          }
+        }
+      });
+    } else {
+      pieCtx.parentElement.innerHTML='<div class="no-data">ไม่มีข้อมูล</div>';
     }
   }
 }
@@ -410,8 +492,8 @@ function r1(){
     const pct=Math.round((v.t/mx)*100);
     const sn=dl.replace(/DEEPAL_|Deepal_/g,'').replaceAll('_',' ');
     html+=`<tr><td><span class="rb ${rc}">${i+1}</span></td>
-      <td><div style="font-weight:600">${sn}</div><div style="font-size:11px;color:var(--text-muted)">${dl}</div></td>
-      ${sh.map(s=>`<td style="text-align:center">${v.s[s]||'—'}</td>`).join('')}
+      <td><div style="font-weight:600;font-size:14px">${sn}</div><div style="font-size:12px;color:var(--text-muted)">${dl}</div></td>
+      ${sh.map(s=>`<td style="text-align:center;font-size:14px">${v.s[s]||'—'}</td>`).join('')}
       <td><div class="tv">${v.t}</div><div class="bar" style="width:${pct}%"></div></td></tr>`;
   });
   el.innerHTML=html+'</tbody></table>';
@@ -435,16 +517,14 @@ function r2(){
     const pct=Math.round((v.t/mx)*100);
     const sn=v.dealer.replace(/DEEPAL_|Deepal_/g,'').replaceAll('_',' ');
     html+=`<tr><td><span class="rb ${rc}">${i+1}</span></td>
-      <td style="font-weight:600">${v.sc}</td>
-      <td style="font-size:12px;color:var(--text-muted)">${sn}</td>
-      ${sh.map(s=>`<td style="text-align:center">${v.s[s]||'—'}</td>`).join('')}
+      <td style="font-weight:600;font-size:14px">${v.sc}</td>
+      <td style="font-size:13px;color:var(--text-muted)">${sn}</td>
+      ${sh.map(s=>`<td style="text-align:center;font-size:14px">${v.s[s]||'—'}</td>`).join('')}
       <td><div class="tv">${v.t}</div><div class="bar" style="width:${pct}%"></div></td></tr>`;
   });
   el.innerHTML=html+'</tbody></table>';
 }
-function cl2(){document.getElementById('t2f').value='';document.getElementById('t2t').value='';document.getElementById('t2s').value='';r2();}
-
-function sw(idx){
+function cl2(){document.getElementById('t2f').value='';document.getElementById('t2t').value='';document.getElementById('t2s').value='';r2();}function sw(idx){
   document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('on',i===idx));
   document.querySelectorAll('.tc').forEach((c,i)=>c.classList.toggle('on',i===idx));
   if(idx===0)r0();else if(idx===1)r1();else r2();
