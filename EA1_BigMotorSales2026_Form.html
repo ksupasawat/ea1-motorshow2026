@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EA1 Big Motor Sales 2026 — ฟอร์มบันทึกยอดจอง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f5f7f5; --surface:#ffffff; --surface2:#f0f4f1;
+    --border:#d0ddd4; --border2:#b8ccc0;
+    --primary:#005A44; --primary2:#007a5e; --primary-light:#e6f2ee;
+    --accent:#00a86b; --accent2:#007a50;
+    --text:#1a2e24; --text-muted:#5a7a6a; --text-light:#8aaa9a;
+    --success:#00a86b; --error:#d93025; --warning:#e37400;
+    --white:#ffffff; --black:#0d1a12;
+    --shadow:0 2px 12px rgba(0,90,68,.08);
+    --shadow-lg:0 8px 32px rgba(0,90,68,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* ── HEADER ── */
+  .header{
+    background:var(--primary);
+    border-bottom:3px solid var(--accent);
+    padding:0 28px;
+    display:flex;align-items:center;gap:16px;height:68px;
+    position:sticky;top:0;z-index:100;
+    box-shadow:0 2px 16px rgba(0,90,68,.25);
+  }
+  .logo-wrap{display:flex;align-items:center;gap:12px;}
+  .logo-img{width:38px;height:38px;object-fit:contain;filter:brightness(0) invert(1);}
+  .logo-divider{width:1px;height:32px;background:rgba(255,255,255,.25);}
+  .header-text h1{font-family:'Kanit',sans-serif;font-size:17px;font-weight:700;color:#fff;letter-spacing:.02em;}
+  .header-text p{font-size:12px;color:rgba(255,255,255,.65);margin-top:1px;}
+  .sync-pill{margin-left:auto;display:flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:20px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,.8);}
+  .sdot{width:7px;height:7px;border-radius:50%;background:#6dffc7;flex-shrink:0;}
+  .sdot.spin{background:#ffd06d;animation:blink 1s infinite;}
+  .sdot.err{background:#ff6b6b;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ── SETUP BANNER ── */
+  .container{max-width:780px;margin:0 auto;padding:28px 20px 60px;}
+  .setup-banner{background:#fff8e6;border:1.5px solid #ffd06d;border-left:4px solid var(--warning);
+    border-radius:12px;padding:20px 22px;margin-bottom:22px;}
+  .setup-banner h3{font-family:'Kanit',sans-serif;font-size:14px;color:var(--warning);margin-bottom:12px;}
+  .setup-steps{display:flex;flex-direction:column;gap:10px;}
+  .step{display:flex;gap:12px;align-items:flex-start;}
+  .step-num{width:26px;height:26px;border-radius:50%;background:var(--warning);
+    color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-top:1px;}
+  .step-txt{font-size:13px;line-height:1.65;color:#5a4a2a;}
+  .step-txt strong{color:#3a2a0a;}
+  .step-txt code{background:rgba(0,90,68,.08);border:1px solid rgba(0,90,68,.2);
+    border-radius:5px;padding:1px 7px;font-size:12px;color:var(--primary);font-family:monospace;}
+  .url-row{display:flex;gap:8px;margin-top:10px;}
+  .url-inp{flex:1;background:#fff;border:1.5px solid var(--border);border-radius:9px;
+    padding:10px 13px;color:var(--text);font-size:13px;font-family:'Sarabun',sans-serif;
+    transition:border-color .2s;}
+  .url-inp:focus{outline:none;border-color:var(--primary);}
+  .url-inp::placeholder{color:var(--text-light);}
+  .btn-url{background:var(--primary);color:#fff;border:none;border-radius:9px;
+    padding:10px 18px;font-weight:700;font-size:13px;font-family:'Kanit',sans-serif;
+    cursor:pointer;white-space:nowrap;transition:background .2s;}
+  .btn-url:hover{background:var(--primary2);}
+  .url-ok{background:#e6f7f0;border:1px solid #a0d8bf;border-radius:9px;
+    padding:10px 14px;font-size:13px;color:var(--primary);display:flex;align-items:center;gap:8px;margin-top:8px;}
+
+  /* ── CARD ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+    padding:28px;margin-bottom:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--primary),var(--accent),transparent);}
+  .card-title{font-family:'Kanit',sans-serif;font-size:15px;font-weight:600;color:var(--primary);
+    margin-bottom:22px;display:flex;align-items:center;gap:8px;}
+  .dot-live{width:8px;height:8px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 3px rgba(0,168,107,.2);}
+
+  /* ── FORM ── */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .full{grid-column:1/-1;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:12px;font-weight:600;color:var(--text-muted);
+    letter-spacing:.04em;text-transform:uppercase;}
+  .req{color:var(--error);margin-left:2px;}
+  .field input,.field select{
+    background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;
+    padding:11px 13px;font-size:15px;font-family:'Sarabun',sans-serif;color:var(--text);
+    transition:border-color .2s,box-shadow .2s;appearance:none;width:100%;}
+  .field select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23005A44' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 13px center;
+    padding-right:34px;cursor:pointer;}
+  .field input:focus,.field select:focus{
+    outline:none;border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(0,90,68,.1);background:#fff;}
+  .field input[readonly]{background:var(--primary-light);color:var(--primary);
+    font-weight:600;cursor:default;border-color:rgba(0,90,68,.2);}
+  .field select:disabled{opacity:.45;cursor:not-allowed;}
+  .field select option{background:#fff;color:var(--text);}
+  .err-msg{font-size:12px;color:var(--error);display:none;}
+  .field.has-error input,.field.has-error select{border-color:var(--error);background:#fff5f5;}
+  .field.has-error .err-msg{display:block;}
+  .field.is-valid input,.field.is-valid select{border-color:var(--success);}
+
+  /* ── BUTTONS ── */
+  .submit-wrap{margin-top:24px;display:flex;gap:10px;}
+  .btn-submit{flex:1;background:var(--primary);color:#fff;border:none;border-radius:11px;
+    padding:14px;font-size:16px;font-weight:700;font-family:'Kanit',sans-serif;
+    cursor:pointer;transition:background .2s,transform .1s;
+    display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-submit:hover{background:var(--primary2);transform:translateY(-1px);}
+  .btn-submit:active{transform:translateY(0);}
+  .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .btn-reset{background:var(--surface2);border:1.5px solid var(--border);color:var(--text-muted);
+    border-radius:11px;padding:14px 18px;font-size:14px;font-family:'Sarabun',sans-serif;
+    cursor:pointer;transition:all .2s;}
+  .btn-reset:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+
+  /* ── LOADING SPINNER ── */
+  .spin-sm{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── DUPLICATE MODAL ── */
+  .modal-bg{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    opacity:0;pointer-events:none;transition:opacity .25s;}
+  .modal-bg.open{opacity:1;pointer-events:all;}
+  .modal{background:#fff;border:2px solid #ffe0a0;border-radius:20px;
+    padding:30px;max-width:490px;width:100%;transform:scale(.93);transition:transform .25s;
+    position:relative;overflow:hidden;box-shadow:var(--shadow-lg);}
+  .modal-bg.open .modal{transform:scale(1);}
+  .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,var(--warning),#ff9500);}
+  .modal-icon{font-size:36px;margin-bottom:12px;}
+  .modal-title{font-family:'Kanit',sans-serif;font-size:20px;font-weight:700;
+    color:var(--warning);margin-bottom:6px;}
+  .modal-desc{font-size:13px;color:var(--text-muted);line-height:1.65;margin-bottom:16px;}
+  .dup-card{background:var(--surface2);border:1px solid var(--border);
+    border-radius:12px;padding:15px;margin-bottom:16px;}
+  .dr{display:flex;gap:10px;margin-bottom:7px;font-size:13px;}
+  .dr:last-child{margin-bottom:0;}
+  .dl{color:var(--text-muted);min-width:115px;flex-shrink:0;}
+  .dv{color:var(--text);font-weight:500;}
+  .dv.hi{color:var(--warning);font-weight:700;}
+  .badge-dup{display:inline-block;background:#fff3cd;border:1px solid #ffc107;
+    color:#856404;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:700;
+    margin-left:6px;vertical-align:middle;}
+  .warn-line{font-size:13px;color:var(--warning);font-weight:600;margin-bottom:16px;
+    background:#fff8e6;border-radius:8px;padding:10px 12px;border-left:3px solid var(--warning);}
+  .modal-btns{display:flex;gap:10px;}
+  .btn-cancel-m{flex:1;background:var(--surface2);border:1.5px solid var(--border);
+    color:var(--text);border-radius:10px;padding:12px;font-size:14px;font-weight:600;
+    font-family:'Kanit',sans-serif;cursor:pointer;transition:all .2s;}
+  .btn-cancel-m:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+  .btn-confirm-m{flex:1;background:linear-gradient(135deg,#d97000,#b35000);color:#fff;
+    border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;
+    font-family:'Kanit',sans-serif;cursor:pointer;transition:opacity .2s;}
+  .btn-confirm-m:hover{opacity:.88;}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;top:22px;right:22px;padding:14px 20px;border-radius:12px;
+    font-weight:600;font-size:14px;transform:translateX(130%);transition:transform .3s;z-index:9999;
+    display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);}
+  .toast.show{transform:translateX(0);}
+  .toast.ok{background:var(--primary);color:#fff;}
+  .toast.error{background:var(--error);color:#fff;}
+
+  /* ── RECENT ── */
+  .sec-title{font-family:'Kanit',sans-serif;font-size:14px;color:var(--text-muted);
+    margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .cnt-pill{background:var(--primary-light);color:var(--primary);border-radius:20px;
+    padding:2px 10px;font-size:12px;font-weight:600;border:1px solid rgba(0,90,68,.2);}
+  .recent-list{display:flex;flex-direction:column;gap:7px;}
+  .ri{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:11px 16px;display:grid;grid-template-columns:130px 1fr 1fr 1fr;
+    gap:8px;font-size:13px;align-items:center;box-shadow:0 1px 4px rgba(0,90,68,.05);}
+  .ri-date{color:var(--text-muted);font-size:12px;}
+  .ri-name{font-weight:600;color:var(--text);}
+  .ri-car{color:var(--primary);font-weight:500;}
+  .ri-dealer{color:var(--text-muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  /* ── BOOT ── */
+  #boot{position:fixed;inset:0;z-index:8000;background:var(--primary);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
+  .boot-logo{width:60px;height:60px;object-fit:contain;filter:brightness(0) invert(1);}
+  .sp{width:36px;height:36px;border:3px solid rgba(255,255,255,.25);
+    border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+  .bt{font-family:'Kanit',sans-serif;font-size:14px;color:rgba(255,255,255,.7);}
+
+  @media(max-width:600px){
+    .form-grid{grid-template-columns:1fr;} .full{grid-column:1;}
+    .card{padding:18px;} .ri{grid-template-columns:1fr 1fr;}
+    .ri-dealer{grid-column:1/-1;}
+  }
+</style>
+</head>
+<body>
+
+<div id="boot">
+  <img class="boot-logo" src="data:image/png;base64,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" alt="EA1">
+  <div class="sp"></div>
+  <div class="bt">กำลังเชื่อมต่อระบบ...</div>
+</div>
+
+<div class="header">
+  <div class="logo-wrap">
+    <img class="logo-img" src="data:image/png;base64,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" alt="EA1 Logo">
+    <div class="logo-divider"></div>
+    <div class="header-text">
+      <h1>EA1 Big Motor Sales 2026</h1>
+      <p>ระบบบันทึกข้อมูลยอดจองรถยนต์</p>
+    </div>
+  </div>
+  <div class="sync-pill">
+    <div class="sdot spin" id="sdot"></div>
+    <span id="stxt">กำลังเชื่อมต่อ...</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="setup-banner" id="setupBanner" style="display:none">
+    <h3>⚙️ ตั้งค่าครั้งแรก — เชื่อมต่อ Google Sheets</h3>
+    <div class="setup-steps">
+      <div class="step"><div class="step-num">1</div>
+        <div class="step-txt">เปิด Google Sheet → คลิก <strong>Extensions → Apps Script</strong> → วาง code จากไฟล์ <strong>GoogleAppsScript_EA1_MotorShow2026.js</strong> → Save</div>
+      </div>
+      <div class="step"><div class="step-num">2</div>
+        <div class="step-txt">คลิก <strong>Deploy → New deployment</strong> → Type: <code>Web app</code> → Execute as: <code>Me</code> → Who has access: <code>Anyone</code> → กด <strong>Deploy</strong></div>
+      </div>
+      <div class="step"><div class="step-num">3</div>
+        <div class="step-txt">Copy <strong>Web app URL</strong> ที่ได้ แล้ววางด้านล่างนี้</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="url-row">
+        <input type="url" class="url-inp" id="urlInput" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn-url" onclick="saveURL()">บันทึก URL</button>
+      </div>
+      <div id="urlOk" style="display:none" class="url-ok">✓ เชื่อมต่อสำเร็จ — กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot-live"></span>ฟอร์มบันทึกข้อมูลการจองรถยนต์</div>
+    <form id="f" novalidate>
+      <div class="form-grid">
+        <div class="field full">
+          <label>วันที่บันทึก</label>
+          <input type="text" id="fdate" readonly>
+        </div>
+        <div class="field full" id="wid">
+          <label>เลขบัตรประชาชนลูกค้า <span class="req">*</span></label>
+          <input type="text" id="fid" maxlength="17" placeholder="x-xxxx-xxxxx-xx-x" autocomplete="off">
+          <span class="err-msg">กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง</span>
+        </div>
+        <div class="field" id="wfn">
+          <label>ชื่อลูกค้า <span class="req">*</span></label>
+          <input type="text" id="ffn" maxlength="50" placeholder="ชื่อ">
+          <span class="err-msg">กรุณากรอกชื่อ</span>
+        </div>
+        <div class="field" id="wln">
+          <label>นามสกุลลูกค้า <span class="req">*</span></label>
+          <input type="text" id="fln" maxlength="50" placeholder="นามสกุล">
+          <span class="err-msg">กรุณากรอกนามสกุล</span>
+        </div>
+        <div class="field" id="wsr">
+          <label>รุ่นรถ (Series) <span class="req">*</span></label>
+          <select id="fsr"><option value="">-- กำลังโหลด... --</option></select>
+          <span class="err-msg">กรุณาเลือก Series</span>
+        </div>
+        <div class="field" id="wmd">
+          <label>รุ่นย่อย (Model) <span class="req">*</span></label>
+          <select id="fmd" disabled><option value="">-- เลือก Series ก่อน --</option></select>
+          <span class="err-msg">กรุณาเลือก Model</span>
+        </div>
+        <div class="field" id="wdl">
+          <label>Dealer <span class="req">*</span></label>
+          <select id="fdl"><option value="">-- กำลังโหลด... --</option></select>
+          <span class="err-msg">กรุณาเลือก Dealer</span>
+        </div>
+        <div class="field" id="wsc">
+          <label>พนักงานขาย <span class="req">*</span></label>
+          <select id="fsc" disabled><option value="">-- เลือก Dealer ก่อน --</option></select>
+          <span class="err-msg">กรุณาเลือกพนักงานขาย</span>
+        </div>
+      </div>
+      <div class="submit-wrap">
+        <button type="submit" id="sbtn" class="btn-submit">
+          <div class="spin-sm" id="spinBtn"></div>
+          <span id="sbtnTxt">✓ บันทึกข้อมูลการจอง</span>
+        </button>
+        <button type="button" class="btn-reset" onclick="doReset()">ล้างข้อมูล</button>
+      </div>
+    </form>
+  </div>
+
+  <div>
+    <div class="sec-title">รายการที่บันทึกล่าสุด <span class="cnt-pill" id="cnt">0 รายการ</span></div>
+    <div class="recent-list" id="rl"></div>
+  </div>
+</div>
+
+<!-- Duplicate Modal -->
+<div class="modal-bg" id="dupBg">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">พบข้อมูลลูกค้าซ้ำ!</div>
+    <div class="modal-desc" id="dupDesc"></div>
+    <div class="dup-card" id="dupCard"></div>
+    <div class="warn-line">⚠️ ลูกค้าคนนี้อาจจองรถยนต์ไปแล้ว — กรุณาตรวจสอบก่อนดำเนินการต่อ</div>
+    <div class="modal-btns">
+      <button class="btn-cancel-m" onclick="closeDup()">← ยกเลิก / แก้ไขข้อมูล</button>
+      <button class="btn-confirm-m" onclick="forceSubmit()">ยืนยัน บันทึกต่อ →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyF3XoP3b7ZSh1DJ_qil5KGZV0o6ia1fuCPTx93CUX8QjI8JvYFv42Ol2aDC4KgJTOTTg/exec';
+const FALLBACK_CARS = {"NEVO Q05": ["Q05 MAX", "Q05 Ultra"], "S05": ["S05 BEV", "S05 REEV", "S05 Long Range"], "S07": ["NEW S07", "S07 เดิม", "S07 L"], "L07": ["L07", "L07 S"], "LUMIN": ["LUMIN DC"], "E07": ["E07"], "Hunter": ["Hunter"], "Other": ["Other"]};
+const FALLBACK_DEALERS = [{"code": "C19534", "name": "บริษัท เภตรา อีวี คาร์ จำกัด"}, {"code": "C19550", "name": "บริษัท สเปก อีวี ออโต้ จำกัด"}, {"code": "C22187", "name": "บริษัท ตงเจริญควอลิแทตออโต้ จำกัด"}, {"code": "C19536", "name": "บริษัท ไพรม์มัส โมบิลิตี้ จำกัด"}, {"code": "C19533", "name": "บริษัท รุ่งเจริญ คาร์ จำกัด"}, {"code": "C19535", "name": "บริษัท จิน มอเตอร์ จำกัด"}, {"code": "C21888", "name": "บริษัท เสนา กรีน ออโตโมทีฟ จำกัด"}];
+const FALLBACK_SC = {"บริษัท เภตรา อีวี คาร์ จำกัด": ["สุพจน์ ศุภริพัฒน์", "เสาวลักษณ์ ลิ้มสุวรรณ", "ประกายวรรณ สามลา", "ธนรัตน์ สุมนพันธุ์", "อินทร์จักรเมธา พิสิฐภัทรานนท์", "รัฐการ สุดสนิท", "บุษราภรณ์ ศรีภา", "กมลชนก ทองคำ"], "บริษัท สเปก อีวี ออโต้ จำกัด": ["สิริรัตน์ อัจฉริยพภาพย์", "พัชรินทร์ โคตรสมบัติ", "กิตติ วรสิริกุลชัย", "นพรัตน์ สารมหาชัย", "เสรีวริศ จิรพัสโชคเจริญ", "รัตนาภรณ์ สุวันดี", "ทศ นาวาคูวะ", "นารีรัตน์ เนียมจันทร์", "อรณิชชา นักจานธรรม", "กนกพร หงษ์ทอง", "จิรันธนิน สุวรรณศิลป์", "สุรกิจ ศรีสุวรรณ", "นิรชา ชาวนา", "กิตติศักดิ์ อัครศุภมงคล", "เพชรไพลิน ติงคาราม"], "บริษัท ตงเจริญควอลิแทตออโต้ จำกัด": ["ธิบดี วัชรานุรักษ์", "ณัชชา ศรีพรชัยเจริญ", "พิมพรรณ จ้อยเล็ก", "ศิริพร เพิ่มบุญ", "กานต์ธิดา เสนาสนะ", "ณัฐกิตต์ ศรีพรชัย", "ภัคจิรา สมจิตร์"], "บริษัท ไพรม์มัส โมบิลิตี้ จำกัด": ["ยุรนันท์ ไชยชนะ", "ปัทมาพร สวัสดิผล", "แคทติยา สาครรัตน์", "สนาธิป สุระกูล", "วาสิตา สิริภัทรฉัตร", "สิราภัทร อาหยิ", "วิลาสินี ฮีมวิเศษ", "นัทธี สัตยธรรม", "กิตติพงษ์ บุญช่วย", "พิชชา จึงวิบูลย์สถิตย์", "น้ำฝน ดีทรัพย์", "อัยยะเรศ เมตตา", "ชนม์ณการต์ บุญสุวรรณ์", "นพพล ยินดีสุข", "กมลวรรณ แกล้วกล้า", "สุณิศา จันทร์เลขา"], "บริษัท รุ่งเจริญ คาร์ จำกัด": ["จุฑามาศ มังคุณ", "เจนจิรา โนจิตร", "ณัฏฐ์ธนัญ ไตรภพกาญจนา", "ณัฐกานต์ ตรีเนตร", "ณัฐญาณี ทวีสินสุพรรณ", "ณัฐธิดา ตรีเนตร", "ธนิดา วิระษร", "นิชารัตน์ ภูจินวงษ์", "พิราวรรณ พิมพ์เสน", "วิลาวัลย์ ขุมทรัพย์", "สาวินี กุลเจริญ", "สุชาดา มาตงามเมือง", "สุพัตรา นวลโสภา", "สุวิษา วรฤทธิ์", "อรทัย จันทร์จวง", "อุษา ขันทอง", "กมลเนตร ศรีปัจฉิม", "กรนรา จิรโชควิชญา", "ชรัยย์รัชฏ์ ซอหิรัญ", "ธนัญญา พุฒตา", "ธนาพร การไชยแสง", "นนทิกาญจน์ คุ้มทิม", "ปนัดดา เหลาเลิศ", "ปวีณา สุนุมิตร", "รัชนีวรรณ สุวรรณประวัติ", "กอบเพชร วงศ์เมตตา", "จักรกฤธิ์ จีนชูแก้ว", "จักรพันธ์ จันทร์วิเชียร", "ฐิติกร พ่อค้าไทย"], "บริษัท จิน มอเตอร์ จำกัด": ["ชุตินันท์ อาจประโคน", "ณัฐชนน นาคศรี", "ณัฐพนธ์ ณัฏฐากรกิตติ", "ทิฆัมพร ในอรชร", "ธรรมวัฒน์ ตั้งวัฒนาพรชัย", "นงนภัส คุณากรวงศ์", "ปรียานุช ศิลปศาสตร์", "ปิยะ", "พีระพัฒน์ ทองธาระ", "รัตติยา พัฒนะวิทยานนท์", "รุจน์ณ์ทภัณ รตนธีวัฒน์", "อชิระ จุ๋ยเกตุ"], "บริษัท เสนา กรีน ออโตโมทีฟ จำกัด": ["กนกพร บุญแตง", "จิรัฐติกาล ธรรมณี", "ชัยชาญ ไทยลิ้ม", "ณภัร บัวงาม", "ทิตย์ตยา บัวไข", "ธนรัชต์ ชาญเชิงรบ", "นิธิโชติ ภูมิพิชัยภักดี", "เบญจมาศ เพ็งน่วม", "ปรียาภรณ์ ชัยเสนา", "ปฤณพิชฌน์ กาญจนนพสิทธิ์", "ไพศาล เสนาภิรมย์", "ภาคภูมิ เพชรเดช", "มธุรส เหลางาม", "มนัชณา พันธ์แขก", "วิจิตร วงษ์สุพรรณ", "ศิรประภา คำแดง", "สรวิชญ์ ต้นธรรมจารึก"]};
+let MASTER = { cars:{}, dealers:[], sc:{} };
+let pendingRec = null;
+
+/* ── URL ── */
+function getURL(){ return GAS_URL; }
+function saveURL(){}
+
+/* ── API ── */
+async function apiGet(){
+  const url=getURL(); if(!url) return {};
+  const r=await fetch(url,{method:'GET',redirect:'follow'});
+  return await r.json();
+}
+async function apiPost(payload){
+  const url=getURL(); if(!url) throw new Error('no url');
+  const r=await fetch(url,{method:'POST',redirect:'follow',
+    headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+  return await r.json();
+}
+
+/* ── MASTER DATA → populate dropdowns ── */
+function populateCars(cars){
+  const el=document.getElementById('fsr');
+  el.innerHTML='<option value="">-- เลือก Series --</option>';
+  Object.keys(cars).forEach(s=>{
+    const o=document.createElement('option');o.value=s;o.textContent=s;el.appendChild(o);
+  });
+}
+function populateDealers(dealers){
+  const el=document.getElementById('fdl');
+  el.innerHTML='<option value="">-- เลือก Dealer --</option>';
+  [...dealers].sort((a,b)=>a.name.localeCompare(b.name)).forEach(d=>{
+    const o=document.createElement('option');o.value=d.name;o.textContent=d.name;el.appendChild(o);
+  });
+}
+
+document.getElementById('fsr').addEventListener('change',function(){
+  const m=document.getElementById('fmd');
+  if(!this.value){m.innerHTML='<option value="">-- เลือก Series ก่อน --</option>';m.disabled=true;return;}
+  m.disabled=false; m.innerHTML='<option value="">-- เลือก Model --</option>';
+  (MASTER.cars[this.value]||[]).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;m.appendChild(o);});
+});
+document.getElementById('fdl').addEventListener('change',function(){
+  const s=document.getElementById('fsc');
+  if(!this.value){s.innerHTML='<option value="">-- เลือก Dealer ก่อน --</option>';s.disabled=true;return;}
+  const list=(MASTER.sc&&MASTER.sc[this.value])||(FALLBACK_SC[this.value]||[]);
+  s.disabled=false;
+  s.innerHTML=`<option value="">${list.length?'-- เลือกพนักงานขาย --':'-- ไม่มีข้อมูลพนักงาน --'}</option>`;
+  [...new Set(list)].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});
+});
+
+/* ── ID FORMAT ── */
+document.getElementById('fid').addEventListener('input',function(){
+  let r=this.value.replace(/\D/g,'').slice(0,13),f=r.slice(0,1);
+  if(r.length>1)f+='-'+r.slice(1,5);
+  if(r.length>5)f+='-'+r.slice(5,10);
+  if(r.length>10)f+='-'+r.slice(10,12);
+  if(r.length>12)f+='-'+r.slice(12,13);
+  this.value=f;
+});
+
+/* ── DATETIME ── */
+function nowDT(){const n=new Date(),p=v=>String(v).padStart(2,'0');
+  return `${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;}
+function nowD(){const n=new Date(),p=v=>String(v).padStart(2,'0');
+  return `${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()}`;}
+document.getElementById('fdate').value=nowDT();
+setInterval(()=>document.getElementById('fdate').value=nowDT(),30000);
+
+/* ── SYNC STATUS ── */
+function ss(s){
+  const d=document.getElementById('sdot'),t=document.getElementById('stxt');
+  if(s==='ok'){d.className='sdot';t.textContent='เชื่อมต่อ Google Sheets ✓';}
+  else if(s==='load'){d.className='sdot spin';t.textContent='กำลังซิงค์...';}
+  else{d.className='sdot err';t.textContent='เชื่อมต่อไม่ได้';}
+}
+
+/* ── TOAST ── */
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ── BUSY ── */
+function setBusy(on){
+  document.getElementById('sbtn').disabled=on;
+  document.getElementById('spinBtn').style.display=on?'block':'none';
+  document.getElementById('sbtnTxt').textContent=on?'กำลังบันทึก...':'✓ บันทึกข้อมูลการจอง';
+}
+
+/* ── VALIDATE ── */
+function validate(){
+  let ok=true;
+  [{id:'fid',w:'wid',fn:v=>v.replace(/\D/g,'').length===13},
+   {id:'ffn',w:'wfn',fn:v=>v.trim().length>0},
+   {id:'fln',w:'wln',fn:v=>v.trim().length>0},
+   {id:'fsr',w:'wsr',fn:v=>v!==''},{id:'fmd',w:'wmd',fn:v=>v!==''},
+   {id:'fdl',w:'wdl',fn:v=>v!==''},{id:'fsc',w:'wsc',fn:v=>v!==''},
+  ].forEach(({id,w,fn})=>{
+    const valid=fn(document.getElementById(id).value);
+    document.getElementById(w).classList.toggle('has-error',!valid);
+    document.getElementById(w).classList.toggle('is-valid',valid);
+    if(!valid)ok=false;
+  });
+  return ok;
+}
+
+/* ── DUPLICATE MODAL ── */
+function openDupModal(dup,rec){
+  pendingRec=rec;
+  document.getElementById('dupDesc').innerHTML=
+    `พบรายการที่ตรงกันในฐานข้อมูล <span class="badge-dup">${dup.type}</span><br>ข้อมูลที่เคยบันทึกไว้:`;
+  document.getElementById('dupCard').innerHTML=`
+    <div class="dr"><span class="dl">วันที่จอง</span><span class="dv">${dup.date}</span></div>
+    <div class="dr"><span class="dl">ชื่อ-นามสกุล</span><span class="dv hi">${dup.firstname} ${dup.lastname}</span></div>
+    <div class="dr"><span class="dl">เลขบัตรประชาชน</span><span class="dv hi">${dup.idcard}</span></div>
+    <div class="dr"><span class="dl">Series / Model</span><span class="dv">${dup.series} / ${dup.model}</span></div>
+    <div class="dr"><span class="dl">Dealer</span><span class="dv">${dup.dealer}</span></div>
+    <div class="dr"><span class="dl">พนักงานขาย</span><span class="dv">${dup.sc}</span></div>`;
+  document.getElementById('dupBg').classList.add('open');
+}
+function closeDup(){document.getElementById('dupBg').classList.remove('open');pendingRec=null;}
+async function forceSubmit(){closeDup();if(pendingRec)await commitSave(pendingRec,true);}
+
+/* ── SAVE ── */
+async function commitSave(rec,force=false){
+  setBusy(true); ss('load');
+  try{
+    const res=await apiPost({action:'save',record:rec,forceOverride:force});
+    if(res.status==='duplicate'){setBusy(false);ss('ok');openDupModal(res.match,rec);return;}
+    if(res.status==='ok'){
+      showToast('✓ บันทึกข้อมูลลง Google Sheets สำเร็จ!','ok');
+      doReset(); await loadAll(); ss('ok');
+    } else {showToast('❌ '+res.message,'error');ss('err');}
+  }catch{showToast('❌ เชื่อมต่อไม่ได้ กรุณาตรวจสอบ URL','error');ss('err');}
+  finally{setBusy(false);}
+}
+
+/* ── SUBMIT ── */
+document.getElementById('f').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!validate()){showToast('กรุณากรอกข้อมูลให้ครบถ้วน','error');return;}
+  if(!getURL()){showToast('กรุณาตั้งค่า URL ก่อน','error');return;}
+  const rec={
+    id:Date.now()+'-'+Math.random().toString(36).slice(2,6),
+    date:nowD(),datetime:nowDT(),
+    idcard:document.getElementById('fid').value,
+    firstname:document.getElementById('ffn').value.trim(),
+    lastname:document.getElementById('fln').value.trim(),
+    series:document.getElementById('fsr').value,
+    model:document.getElementById('fmd').value,
+    dealer:document.getElementById('fdl').value,
+    sc:document.getElementById('fsc').value,
+  };
+  await commitSave(rec);
+});
+
+/* ── RESET ── */
+function doReset(){
+  document.getElementById('f').reset();
+  document.getElementById('fdate').value=nowDT();
+  document.getElementById('fmd').innerHTML='<option value="">-- เลือก Series ก่อน --</option>';
+  document.getElementById('fmd').disabled=true;
+  document.getElementById('fsc').innerHTML='<option value="">-- เลือก Dealer ก่อน --</option>';
+  document.getElementById('fsc').disabled=true;
+  document.querySelectorAll('.field').forEach(f=>f.classList.remove('has-error','is-valid'));
+}
+
+/* ── LOAD ALL ── */
+async function loadAll(){
+  if(!getURL()){ss('err');return;}
+  ss('load');
+  try{
+    const json=await apiGet();
+    if(json.masterdata&&Object.keys(json.masterdata.cars||{}).length){
+      MASTER=json.masterdata;
+      populateCars(MASTER.cars);
+      populateDealers(MASTER.dealers);
+    } else {
+      populateCars(FALLBACK_CARS);
+      populateDealers(FALLBACK_DEALERS);
+      MASTER={cars:FALLBACK_CARS,dealers:FALLBACK_DEALERS,sc:FALLBACK_SC};
+    }
+    const recs=json.records||[];
+    document.getElementById('cnt').textContent=recs.length+' รายการ';
+    const rl=document.getElementById('rl');rl.innerHTML='';
+    recs.slice(0,10).forEach(b=>{
+      const d=document.createElement('div');d.className='ri';
+      d.innerHTML=`<span class="ri-date">${b.date}</span>
+        <span class="ri-name">${b.firstname} ${b.lastname}</span>
+        <span class="ri-car">${b.series} / ${b.model}</span>
+        <span class="ri-dealer">${b.dealer}</span>`;
+      rl.appendChild(d);
+    });
+    ss('ok');
+  }catch{ss('err');}
+}
+
+/* ── BOOT ── */
+// Populate with fallback data immediately so dropdowns work
+populateCars(FALLBACK_CARS);
+populateDealers(FALLBACK_DEALERS);
+
+(async()=>{
+  await loadAll();
+  document.getElementById('boot').style.display='none';
+})();
+/* auto-refresh ทุก 60 วินาที และหยุดถ้ากำลังกรอกฟอร์มอยู่ */
+let _lastActivity = Date.now();
+document.getElementById('f').addEventListener('input', ()=>{ _lastActivity = Date.now(); });
+document.getElementById('f').addEventListener('focus', ()=>{ _lastActivity = Date.now(); }, true);
+setInterval(()=>{
+  const idleSec = (Date.now() - _lastActivity) / 1000;
+  if(idleSec >= 30) loadAll();
+}, 60000);
+</script>
+</body>
+</html>
