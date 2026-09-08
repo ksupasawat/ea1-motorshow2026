@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Big Motor Sales 2026 — Executive Dashboard</title>
+<title>Motor Event Dashboard — Executive Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Kanit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -340,7 +340,7 @@ body {
 <div id="landing">
   <div class="landing-header">
     <div class="landing-eyebrow">Executive Dashboard</div>
-    <div class="landing-title">BIG MOTOR SALES 2026</div>
+    <div class="landing-title">MOTOR EVENT DASHBOARD</div>
     <div class="landing-subtitle">Select Brand to View Dashboard</div>
   </div>
 
@@ -370,7 +370,7 @@ body {
     </div>
   </div>
 
-  <div class="landing-footer">BIG MOTOR SALES 2026 &nbsp;·&nbsp; EA1 GROUP</div>
+  <div class="landing-footer">MOTOR EVENT DASHBOARD &nbsp;·&nbsp; EA1 GROUP</div>
 </div>
 
 <!-- ── DASHBOARD FRAME ── -->
@@ -426,7 +426,7 @@ function openDash(brand) {
 
   // update browser title
   const names = {avatr:'AVATR', deepal:'DEEPAL'};
-  document.title = `${names[brand]} Dashboard — Big Motor Sales 2026`;
+  document.title = `${names[brand]} Dashboard — Motor Event Dashboard`;
 }
 
 function goBack() {
@@ -444,7 +444,7 @@ function goBack() {
   landing.classList.remove('fade-in');
   void landing.offsetWidth; // reflow
   landing.classList.add('fade-in');
-  document.title = 'Big Motor Sales 2026 — Executive Dashboard';
+  document.title = 'Motor Event Dashboard — Executive Dashboard';
 }
 
 function onIframeLoad() {
