@@ -198,6 +198,33 @@
     .card{padding:18px;} .ri{grid-template-columns:1fr 1fr;}
     .ri-dealer{grid-column:1/-1;}
   }
+
+  /* ── CHECKBOX ── */
+  .check-field {
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface2); border:1.5px solid var(--border);
+    border-radius:10px; padding:14px 16px; cursor:pointer;
+    transition:all .2s; user-select:none;
+  }
+  .check-field:hover { border-color:var(--primary); background:#fff; }
+  .check-field input[type="checkbox"] { display:none; }
+  .check-box {
+    width:22px; height:22px; border-radius:6px;
+    border:2px solid var(--border2,#bbb);
+    background:#fff; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:all .2s;
+  }
+  .check-field:hover .check-box { border-color:var(--primary); }
+  .check-field input:checked ~ .check-box {
+    background:var(--primary); border-color:var(--primary);
+  }
+  .check-field input:checked ~ .check-box::after {
+    content:'✓'; color:#fff; font-size:13px; font-weight:700; line-height:1;
+  }
+  .check-label { font-size:15px; font-weight:600; color:var(--text); }
+  .check-sub { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .check-field.checked { border-color:var(--success); background:#f0fff4; }
+  .check-field.checked .check-label { color:var(--success,#2d7a2d); }
 </style>
 </head>
 <body>
@@ -289,6 +316,19 @@
           <label>พนักงานขาย <span class="req">*</span></label>
           <select id="fsc" disabled><option value="">-- เลือก Dealer ก่อน --</option></select>
           <span class="err-msg">กรุณาเลือกพนักงานขาย</span>
+        </div>
+
+        <!-- ของชำร่วย -->
+        <div class="field full" id="wgift">
+          <label>ของชำร่วย</label>
+          <label class="check-field" id="giftLabel" onclick="toggleGift()">
+            <input type="checkbox" id="fgift">
+            <div class="check-box" id="giftBox"></div>
+            <div>
+              <div class="check-label" id="giftTxt">ยังไม่ได้รับของชำร่วย</div>
+              <div class="check-sub">คลิกเพื่อบันทึกว่าลูกค้ารับของชำร่วยแล้ว</div>
+            </div>
+          </label>
         </div>
       </div>
       <div class="submit-wrap">
@@ -496,6 +536,10 @@ function doReset(){
   document.getElementById('fsc').innerHTML='<option value="">-- เลือก Dealer ก่อน --</option>';
   document.getElementById('fsc').disabled=true;
   document.querySelectorAll('.field').forEach(f=>f.classList.remove('has-error','is-valid'));
+  document.getElementById('fgift').checked=false;
+  document.getElementById('giftLabel').classList.remove('checked');
+  document.getElementById('giftTxt').textContent='ยังไม่ได้รับของชำร่วย';
+  document.getElementById('giftBox').innerHTML='';
 }
 
 /* ── LOAD ALL ── */
@@ -545,6 +589,23 @@ setInterval(()=>{
   const idleSec = (Date.now() - _lastActivity) / 1000;
   if(idleSec >= 30) loadAll();
 }, 60000);
+
+function toggleGift() {
+  const cb = document.getElementById('fgift');
+  cb.checked = !cb.checked;
+  const lbl = document.getElementById('giftLabel');
+  const txt = document.getElementById('giftTxt');
+  const box = document.getElementById('giftBox');
+  if (cb.checked) {
+    lbl.classList.add('checked');
+    txt.textContent = '✓ รับของชำร่วยแล้ว';
+    box.innerHTML = '';
+  } else {
+    lbl.classList.remove('checked');
+    txt.textContent = 'ยังไม่ได้รับของชำร่วย';
+    box.innerHTML = '';
+  }
+}
 </script>
 </body>
 </html>
