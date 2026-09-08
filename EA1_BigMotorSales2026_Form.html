@@ -523,6 +523,7 @@ document.getElementById('f').addEventListener('submit',async function(e){
     model:document.getElementById('fmd').value,
     dealer:document.getElementById('fdl').value,
     sc:document.getElementById('fsc').value,
+    gift:document.getElementById('fgift').checked
   };
   await commitSave(rec);
 });
